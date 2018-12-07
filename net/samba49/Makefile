@@ -3,7 +3,7 @@
 
 PORTNAME=			${SAMBA4_BASENAME}49
 PORTVERSION=			${SAMBA4_VERSION}
-PORTREVISION=			2	
+PORTREVISION=			1
 CATEGORIES?=			net
 MASTER_SITES=			SAMBA/samba/stable SAMBA/samba/rc
 DISTNAME=			${SAMBA4_DISTNAME}
@@ -23,7 +23,6 @@ EXTRA_PATCHES+=		 	${PATCHDIR}/0001-add-ix-custom-vfs-modules.patch:-p1
 EXTRA_PATCHES+=		 	${PATCHDIR}/0001-add-support-for-xattrs-larger-than-64k.patch:-p1
 EXTRA_PATCHES+=		 	${PATCHDIR}/0001-add-parameters-for-ha-configuration.patch:-p1
 EXTRA_PATCHES+=			${PATCHDIR}/0001-add-idmap_fruit-backend.patch:-p1
-EXTRA_PATCHES+=			${PATCHDIR}/0001-fix-shadowcopy-streams.patch:-p1
 
 SAMBA4_BASENAME=		samba
 SAMBA4_PORTNAME=		${SAMBA4_BASENAME}4
@@ -39,9 +38,9 @@ CPE_PRODUCT=			samba
 VARDIR=				${DESTDIR}/var
 SAMBA4_RUNDIR=			${VARDIR}/run/${SAMBA4_PORTNAME}
 SAMBA4_LOGDIR=			${VARDIR}/log/${SAMBA4_PORTNAME}
-SAMBA4_LOCKDIR=			${VARDIR}/db/${SAMBA4_PORTNAME}
-SAMBA4_BINDDNSDIR=		${SAMBA4_LOCKDIR}/bind-dns
-SAMBA4_PRIVATEDIR=		${SAMBA4_LOCKDIR}/private
+SAMBA4_LOCKDIR=			${VARDIR}/run/${SAMBA4_PORTNAME}
+SAMBA4_BINDDNSDIR=		${VARDIR}/db/${SAMBA4_PORTNAME}/bind-dns
+SAMBA4_PRIVATEDIR=		${VARDIR}/db/${SAMBA4_PORTNAME}/private
 SAMBA4_PAMDIR=			${PREFIX}/lib
 SAMBA4_LIBDIR=			${PREFIX}/lib/${SAMBA4_PORTNAME}
 SAMBA4_MODULEDIR=		${PREFIX}/lib/shared-modules
@@ -88,8 +87,8 @@ SUB_LIST+=			PKGCONFIGDIR=${PKGCONFIGDIR_REL}
 # Options
 OPTIONS_SUB=			yes
 
-OPTIONS_DEFINE=			AD_DC ADS DEBUG DOCS FAM LDAP LIBZFS\
-				QUOTAS SYSLOG UTMP PROFILE
+OPTIONS_DEFINE=			AD_DC ADS DOCS FAM LDAP LIBZFS\
+				QUOTAS SYSLOG UTMP
 # Make those default options
 OPTIONS_DEFAULT:=		${OPTIONS_DEFINE}
 # This shouldn't be default in the release
@@ -337,7 +336,7 @@ LDAP_VARS=			SAMBA4_MODULES+=idmap_ldap
 
 LIBZFS_CONFIGURE_WITH=		libzfs
 LIBZFS_CONFIGURE_OFF=		--without-libzfs
-LIBZFS_VARS=			SAMBA4_MODULES+=vfs_zfs_space
+LIBZFS_VARS=			SAMBA4_MODULES+=vfs_zfs_space vfs_ixnas
 
 MANDOC_BUILD_DEPENDS=		${LOCALBASE}/share/xsl/docbook/manpages/docbook.xsl:textproc/docbook-xsl \
 				xsltproc:textproc/libxslt
@@ -376,8 +375,8 @@ SAMBA4_MODULES+=		auth_skel pdb_test gpext_security gpext_registry gpext_scripts
 
 .if ${PORT_OPTIONS:MLIBZFS}
 CONFIGURE_ARGS+=        --with-libzfs
-WANT_EXP_MODULES+=      vfs_zfs_space
-SAMBA4_MODULES+=        vfs_zfs_space
+WANT_EXP_MODULES+=      vfs_zfs_space vfs_ixnas
+SAMBA4_MODULES+=        vfs_zfs_space vfs_ixnas
 PLIST_SUB+=             LIBZFS=""
 .else
 CONFIGURE_ARGS+=        --without-libzfs
