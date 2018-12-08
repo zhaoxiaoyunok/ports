@@ -22,7 +22,7 @@ LDB_DEPENDS=		talloc>=2.1.8:devel/talloc \
 			tdb>=1.3.12,1:databases/tdb \
 			popt>=0:devel/popt
 
-CONFLICTS_INSTALL=	ldb1[23]-1.*
+CONFLICTS_INSTALL=	ldb1[234]-1.*
 
 #FLAVORS=		default nopython
 #nopython_PKGNAMESUFFIX=	-nopython
