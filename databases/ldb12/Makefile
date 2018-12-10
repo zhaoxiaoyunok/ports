@@ -24,7 +24,7 @@ LDB_DEPENDS=		talloc>=2.1.10:devel/talloc \
 			cmocka>=1.1.1:sysutils/cmocka \
 			popt>=0:devel/popt
 
-CONFLICTS_INSTALL=	ldb-1.1.* ldb13-1.3.*
+CONFLICTS_INSTALL=	ldb-1.1.* ldb13-1.3.* ldb14-1.4.*
 
 #FLAVORS=		default nopython
 #nopython_PKGNAMESUFFIX=	-nopython

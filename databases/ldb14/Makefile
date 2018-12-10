@@ -6,7 +6,7 @@ PORTREVISION=		0
 PORTEPOCH=		0
 CATEGORIES=		databases
 MASTER_SITES=		SAMBA
-PKGNAMESUFFIX=		13
+PKGNAMESUFFIX=		14
 
 MAINTAINER=		awalker@ixsystems.com	
 COMMENT=		LDAP-like embedded database
