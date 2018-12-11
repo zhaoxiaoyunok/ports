@@ -1,12 +1,12 @@
-From 1696493aa306f67a173faaf9ae13cbb1753850b9 Mon Sep 17 00:00:00 2001
+From c6d16907616383016a44a9d705c84c056ef33357 Mon Sep 17 00:00:00 2001
 From: awalker <awalker@ixsystems.com>
 Date: Mon, 10 Dec 2018 13:37:55 -0500
 Subject: [PATCH] Advertise adisk
 
 ---
  source3/client/dnsbrowse.c |  19 ++-
- source3/smbd/dnsregister.c | 311 +++++++++++++++++++++++++++++++++++----------
- 2 files changed, 256 insertions(+), 74 deletions(-)
+ source3/smbd/dnsregister.c | 315 +++++++++++++++++++++++++++++++++++----------
+ 2 files changed, 260 insertions(+), 74 deletions(-)
 
 diff --git a/source3/client/dnsbrowse.c b/source3/client/dnsbrowse.c
 index be6eb88..83aef96 100644
@@ -78,10 +78,10 @@ index be6eb88..83aef96 100644
  			do_smb_browse_reply, &bstate);
  
 diff --git a/source3/smbd/dnsregister.c b/source3/smbd/dnsregister.c
-index df18900..ff0b802 100644
+index df18900..c957b57 100644
 --- a/source3/smbd/dnsregister.c
 +++ b/source3/smbd/dnsregister.c
-@@ -36,85 +36,170 @@
+@@ -36,85 +36,175 @@
  #include <dns_sd.h>
  
  struct dns_reg_state {
@@ -177,17 +177,20 @@ index df18900..ff0b802 100644
 +    va_list ap;
 +
 +    if( 0 > asprintf(&key, key_fmt, key_var))
++	DEBUG(1, ("Failed in asprintf\n"));
 +        return -1;
 +
 +    va_start( ap, fmt );
 +    if( 0 > vasprintf(&str, fmt, ap )) {
 +        va_end(ap);
++	DEBUG(1, ("Failed in vasprintf\n"));
 +        ret = -1;
 +        goto exit;
 +    }
 +    va_end(ap);
 +
 +    if( kDNSServiceErr_NoError != TXTRecordSetValue(rec, key, strlen(str), str) ) {
++	DEBUG(1, ("Failed in TXTRecordSetValuen"));
 +        ret = -1;
 +        goto exit;
 +    }
@@ -255,9 +258,11 @@ index df18900..ff0b802 100644
 +	TXTRecordRef txt_devinfo;
 +	char *servname;
 +	int num_services = lp_numservices();
++
++	reg_state_destructor(state);
  
 -	dns_reg_state_destructor(dns_state);
-+	reg_state_destructor(state);
++	TXTRecordCreate(&txt_adisk, 0, NULL);
  
 -	DEBUG(6, ("registering _smb._tcp service on port %d\n",
 -		  dns_state->port));
@@ -295,7 +300,7 @@ index df18900..ff0b802 100644
  
  	if (err != kDNSServiceErr_NoError) {
  		/* Failed to register service. Schedule a re-try attempt.
-@@ -123,24 +208,78 @@ static void dns_register_smbd_retry(struct tevent_context *ctx,
+@@ -123,24 +213,77 @@ static void dns_register_smbd_retry(struct tevent_context *ctx,
  		goto retry;
  	}
  
@@ -312,7 +317,6 @@ index df18900..ff0b802 100644
 +		if (lp_snum_ok(snum) && lp_parm_bool(snum, "fruit", "time machine", false))
 +		{
 +			if (!sys_txt_created) {
-+				TXTRecordCreate(&txt_adisk, 0, NULL);
 +				if( 0 > TXTRecordPrintf(&txt_adisk, "sys", "waMa=0,adVF=0x100") ) {
 +					DEBUG(1, ("Failed to create Zeroconf TXTRecord for sys") );
 +					goto retry;
@@ -324,9 +328,9 @@ index df18900..ff0b802 100644
 +			}
 +			servname = lp_const_servicename(snum); 
 +			DEBUG(1, ("Registering volume %s for TimeMachine\n", servname));
-+			if( 0 > TXTRecordKeyPrintf(&txt_adisk, "dk%zu=adVN=%s,adVF=0x82",
-+				dk++, lp_const_servicename(snum)) ) {
-+				DEBUG(1, ("Could not set Zeroconf TXTRecord for dk%zu", dk));
++			if( 0 > TXTRecordKeyPrintf(&txt_adisk, "dk%zu", dk++, "adVN=%s,adVF=0x82",
++				lp_const_servicename(snum)) ) {
++				DEBUG(1, ("Could not set Zeroconf TXTRecord for dk%zu \n", dk));
 +				goto retry;
 +			} 
 +		}
@@ -384,7 +388,7 @@ index df18900..ff0b802 100644
  		timeval_current_ofs(DNS_REG_RETRY_INTERVAL, 0));
  }
  
-@@ -150,44 +289,82 @@ static void dns_register_smbd_fde_handler(struct tevent_context *ev,
+@@ -150,44 +293,82 @@ static void dns_register_smbd_fde_handler(struct tevent_context *ev,
  					  uint16_t flags,
  					  void *private_data)
  {
@@ -409,16 +413,16 @@ index df18900..ff0b802 100644
 -	dns_register_smbd_schedule(dns_state,
 -		timeval_current_ofs(DNS_REG_RETRY_INTERVAL, 0));
 +	dns_register_smbd_schedule(state, timeval_zero());
-+}
-+
+ }
+ 
 +static int dns_reg_state_destructor(struct dns_reg_state *state)
 +{
 +	if (state != NULL) {
 +		talloc_free(state);
 +	}
 +	return 0;
- }
- 
++}
++
 +
  bool smbd_setup_mdns_registration(struct tevent_context *ev,
  				  TALLOC_CTX *mem_ctx,
