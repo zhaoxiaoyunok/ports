@@ -41,6 +41,7 @@ SAMBA4_LOGDIR=			${VARDIR}/log/${SAMBA4_PORTNAME}
 SAMBA4_LOCKDIR=			${VARDIR}/run/${SAMBA4_PORTNAME}
 SAMBA4_BINDDNSDIR=		${VARDIR}/db/${SAMBA4_PORTNAME}/bind-dns
 SAMBA4_PRIVATEDIR=		${VARDIR}/db/${SAMBA4_PORTNAME}/private
+SAMBA4_STATEDIR=		${VARDIR}/db/${SAMBA4_PORTNAME}
 SAMBA4_PAMDIR=			${PREFIX}/lib
 SAMBA4_LIBDIR=			${PREFIX}/lib/${SAMBA4_PORTNAME}
 SAMBA4_MODULEDIR=		${PREFIX}/lib/shared-modules
@@ -62,7 +63,7 @@ CONFIGURE_ARGS+=		--mandir="${MANPREFIX}/man" \
 				--with-sockets-dir="${SAMBA4_RUNDIR}" \
 				--with-privileged-socket-dir="${SAMBA4_RUNDIR}" \
 				--with-lockdir="${SAMBA4_LOCKDIR}" \
-				--with-statedir="${SAMBA4_LOCKDIR}" \
+				--with-statedir="${SAMBA4_STATEDIR}" \
 				--with-cachedir="${SAMBA4_LOCKDIR}" \
 				--with-bind-dns-dir=${SAMBA4_BINDDNSDIR} \
 				--with-privatedir="${SAMBA4_PRIVATEDIR}" \
@@ -272,8 +273,8 @@ NSUPDATE_RUN_DEPENDS=		samba-nsupdate:dns/samba-nsupdate
 AVAHI_CONFIGURE_ENABLE=		avahi
 AVAHI_LIB_DEPENDS=		libavahi-client.so:net/avahi-app
 
-#MDNSRESPONDER_CONFIGURE_ENABLE=	dnssd
-#MDNSRESPONDER_LIB_DEPENDS=	libdns_sd.so:net/mDNSResponder
+MDNSRESPONDER_CONFIGURE_ENABLE=	dnssd
+MDNSRESPONDER_LIB_DEPENDS=	libdns_sd.so:net/mDNSResponder
 ##############################################################################
 DEBUG_CONFIGURE_ON=		--verbose --enable-debug
 DEBUG_MAKE_ARGS=		--verbose
