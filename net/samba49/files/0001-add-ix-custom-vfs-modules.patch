@@ -1,9 +1,9 @@
 diff --git a/source3/modules/smb_libzfs.c b/source3/modules/smb_libzfs.c
 new file mode 100644
-index 0000000..4de01c2
+index 0000000..69fc837
 --- /dev/null
 +++ b/source3/modules/smb_libzfs.c
-@@ -0,0 +1,323 @@
+@@ -0,0 +1,313 @@
 +/*-
 + * Copyright 2018 iXsystems, Inc.
 + * All rights reserved
@@ -62,7 +62,7 @@ index 0000000..4de01c2
 +	uint64_t quota, used; 
 +	quota = used = 0;
 +
-+	DBG_ERR("Path: (%s), xid: %lu), qtype (%u)\n",
++	DBG_DEBUG("Path: (%s), xid: %lu), qtype (%u)\n",
 +		path, xid, quota_type);
 +
 +	switch (quota_type) {
@@ -70,13 +70,13 @@ index 0000000..4de01c2
 +	case SMB_USER_FS_QUOTA_TYPE:
 +		snprintf(u_req, sizeof(u_req), "userused@%lu", xid);
 +		snprintf(q_req, sizeof(q_req), "userquota@%lu", xid);
-+		DBG_ERR("u_req: (%s), q_req (%s)\n", u_req, q_req);
++		DBG_DEBUG("u_req: (%s), q_req (%s)\n", u_req, q_req);
 +		break;
 +	case SMB_GROUP_QUOTA_TYPE:
 +	case SMB_GROUP_FS_QUOTA_TYPE:
 +		snprintf(u_req, sizeof(u_req), "groupused@%lu", xid);
 +		snprintf(q_req, sizeof(q_req), "groupquota@%lu", xid);
-+		DBG_ERR("u_req: (%s), q_req (%s)\n", u_req, q_req);
++		DBG_DEBUG("u_req: (%s), q_req (%s)\n", u_req, q_req);
 +		break;
 +	default:
 +		DBG_ERR("Received unknown quota type (%d)\n", quota_type);
@@ -103,7 +103,7 @@ index 0000000..4de01c2
 +		return (-1);
 +	}
 +	
-+	DBG_ERR("userused string: (%s), userquota string: (%s)\n", u_req, q_req);
++	DBG_DEBUG("userused string: (%s), userquota string: (%s)\n", u_req, q_req);
 +	zfs_prop_get_userquota_int(zfsp, q_req, &quota);
 +	zfs_prop_get_userquota_int(zfsp, u_req, &used);
 +
@@ -130,18 +130,18 @@ index 0000000..4de01c2
 +	hardlimit *= blocksize;
 +	snprintf(quota, sizeof(quota), "%lu", hardlimit); 
 +
-+	DBG_ERR("Path: (%s), xid: %lu), qtype (%u), limit (%lu)\n",
++	DBG_DEBUG("Path: (%s), xid: %lu), qtype (%u), limit (%lu)\n",
 +		path, xid, quota_type, hardlimit);
 +	switch (quota_type) {
 +	case SMB_USER_QUOTA_TYPE:
 +	case SMB_USER_FS_QUOTA_TYPE:
 +		snprintf(q_req, sizeof(q_req), "userquota@%lu", xid);
-+		DBG_ERR("userquota string is (%s)\n", q_req);
++		DBG_DEBUG("userquota string is (%s)\n", q_req);
 +		break;
 +	case SMB_GROUP_QUOTA_TYPE:
 +	case SMB_GROUP_FS_QUOTA_TYPE:
 +		snprintf(q_req, sizeof(q_req), "groupquota@%lu", xid);
-+		DBG_ERR("groupquota string is (%s)\n", q_req);
++		DBG_DEBUG("groupquota string is (%s)\n", q_req);
 +		break;
 +	default:
 +		DBG_ERR("Received unknown quota type (%d)\n", quota_type);
@@ -169,7 +169,7 @@ index 0000000..4de01c2
 +		return (-1);
 +	}
 +
-+	DBG_ERR("PREPARING: smb_zfs_set_quota: Set (%s = %s)\n", q_req, quota);
++	DBG_INFO("PREPARING: smb_zfs_set_quota: Set (%s = %s)\n", q_req, quota);
 +	if (zfs_prop_set(zfsp, q_req, quota) != 0) {
 +		DBG_ERR("Failed to set (%s = %s)\n", q_req, quota);
 +		zfs_close(zfsp);
@@ -255,15 +255,6 @@ index 0000000..4de01c2
 +	return (*dfree);
 +}
 +
-+
-+/*
-+ *	Create auto home dataset
-+ *	1) create dataset
-+ *	2) mount dataset
-+ *	3) set required properties
-+ *	4) set ACL
-+ */
-+
 +int
 +smb_zfs_create_homedir(char *parent, const char *base, const char *quota)
 +{
@@ -273,7 +264,6 @@ index 0000000..4de01c2
 +	char *p = strdup(parent);
 +	const char *parent_dataset;
 +	char nd[PATH_MAX] = { 0 };
-+	char homepath[PATH_MAX] = { 0 };
 +	if (parent == NULL) {
 +		return (-1);
 +	}
@@ -292,10 +282,8 @@ index 0000000..4de01c2
 +		return (-1);
 +	}
 +	parent_dataset = zfs_get_name(zfsp); 
-+	DEBUG(0, ("Parent dataset detected as (%s)\n", parent_dataset) );
 +	snprintf(nd, sizeof(nd), "%s/%s", parent_dataset, base);
 +  
-+	DEBUG(0, ("Preparing to create ZFS dataset (%s)\n", nd));
 +	if (zfs_create(libzfsp, nd, ZFS_TYPE_DATASET, NULL) != 0){
 +		DBG_ERR("Failed to create dataset to path (%s)\n", nd);
 +		zfs_close(zfsp);
@@ -312,7 +300,6 @@ index 0000000..4de01c2
 +		return (-1);
 +	}
 +
-+	DEBUG(0, ("Preparing to mount ZFS dataset (%s)\n", nd));
 +	if (zfs_mount(new_zfsp, NULL, 0) != 0) {
 +		DBG_ERR("Failed to mount ZFS dataset (%s)\n", nd);
 +	}
@@ -322,6 +309,9 @@ index 0000000..4de01c2
 +			DBG_ERR("Failed to set quota to (%s)\n", quota);
 +		}
 +	}
++
++	DBG_DEBUG("Created ZFS dataset (%s) with quota (%s)\n", nd, quota);
++
 +	zfs_close(new_zfsp);
 +	libzfs_fini(libzfsp);
 +
@@ -374,10 +364,10 @@ index 0000000..27f8977
 +#endif	/* !__SMB_LIBZFS_H */
 diff --git a/source3/modules/vfs_ixnas.c b/source3/modules/vfs_ixnas.c
 new file mode 100644
-index 0000000..8266815
+index 0000000..d3a1048
 --- /dev/null
 +++ b/source3/modules/vfs_ixnas.c
-@@ -0,0 +1,1066 @@
+@@ -0,0 +1,1093 @@
 +/*
 + *  Unix SMB/CIFS implementation.
 + *  A dumping ground for FreeBSD-specific VFS functions. For testing case
@@ -1071,6 +1061,12 @@ index 0000000..8266815
 +				struct ixnas_config_data,
 +				return -1);
 +
++	if (!config->zfs_quota_enabled) {
++		DBG_ERR("Quotas disabled in ixnas configuration.\n");
++		errno = ENOSYS;
++		return -1;
++	}
++
 +	if (realpath(smb_fname->base_name, rp) == NULL) {
 +		DBG_ERR("failed to get realpath for (%s)\n", smb_fname->base_name);
 +		return (-1);
@@ -1132,6 +1128,12 @@ index 0000000..8266815
 +				struct ixnas_config_data,
 +				return -1);
 +
++	if (!config->zfs_quota_enabled) {
++		DBG_ERR("Quotas disabled in ixnas configuration.\n");
++		errno = ENOSYS;
++		return -1;
++	}
++
 +	become_root();
 +	switch (qtype) {
 +	case SMB_USER_QUOTA_TYPE:
@@ -1166,7 +1168,9 @@ index 0000000..8266815
 + exists  
 +********************************************************************/
 +
-+static int create_zfs_autohomedir(vfs_handle_struct *handle, const char *homedir_quota)
++static int create_zfs_autohomedir(vfs_handle_struct *handle, 
++				  const char *homedir_quota,
++				  const char *user)
 +{
 +	bool ret;
 +	int naces;
@@ -1187,11 +1191,12 @@ index 0000000..8266815
 +		return -1;
 +	}
 +
-+	DBG_DEBUG("Preparing to create dataset (%s) with parentdir (%s) with quota (%s)\n", 
++	DBG_INFO("Preparing to create dataset (%s) with parentdir (%s) with quota (%s)\n", 
 +		parent, base, homedir_quota);
 +
 +	if (realpath(parent, rp) == NULL ){
 +		DBG_ERR("Parent directory does not exist, skipping automatic dataset creation.\n");
++		TALLOC_FREE(parent);
 +		TALLOC_FREE(tmp_ctx);
 +		return -1;
 +	}
@@ -1200,35 +1205,45 @@ index 0000000..8266815
 +
 +	if ((naces = acl(parent, ACE_GETACLCNT, 0, NULL)) < 0) {
 +		DBG_ERR("ACE_GETACLCNT failed with (%s)\n", strerror(errno));
++		TALLOC_FREE(parent);
 +		TALLOC_FREE(tmp_ctx);
 +		return -1;
 +	}
 +	if ((parent_acl = talloc_size(tmp_ctx, sizeof(ace_t) * naces)) == NULL) {
 +		DBG_ERR("Failed to allocate memory for parent ACL\n");
 +		errno = ENOMEM;
++		TALLOC_FREE(parent);
 +		TALLOC_FREE(tmp_ctx);
 +		return -1;
 +	}
 +
 +	if ((acl(parent, ACE_GETACL, naces, parent_acl)) < 0) {
 +		DBG_ERR("ACE_GETACL failed with (%s)\n", strerror(errno));
++		TALLOC_FREE(parent);
 +		TALLOC_FREE(tmp_ctx);
 +		return -1;
 +	}
 +
 +	if (acl(handle->conn->connectpath, ACE_SETACL, naces, parent_acl) < 0) {
 +		DBG_ERR("ACE_SETACL failed with (%s)\n", strerror(errno));
++		TALLOC_FREE(parent);
 +		TALLOC_FREE(tmp_ctx);
-+		ret = -1;
++		return -1;
 +	}
 +
-+	if (lp_parm_bool(SNUM(handle->conn), "ixnas", "do_homedir_chown", true)) {
-+		become_root();
-+		if (chown(handle->conn->connectpath, geteuid(), getegid()) < 0) {
++	if (lp_parm_bool(SNUM(handle->conn), "ixnas", "chown_homedir", true)) {
++		struct passwd *current_user = Get_Pwnam_alloc(tmp_ctx, user);
++		if ( !current_user ) {
++			DBG_ERR("Get_Pwnam_alloc failed for (%s).\n", user); 
++			TALLOC_FREE(parent);
++			TALLOC_FREE(tmp_ctx);
++			return -1;
++		}		
++		if (chown(handle->conn->connectpath, current_user->pw_uid, current_user->pw_gid) < 0) {
 +			DBG_ERR("Failed to chown (%s) to (%u:%u)\n",
-+				handle->conn->connectpath, geteuid(), getegid() );
++				handle->conn->connectpath, current_user, getegid() );
++			ret = -1;
 +		}	
-+		unbecome_root();
 +	} 
 +
 +	TALLOC_FREE(parent);
@@ -1255,8 +1270,6 @@ index 0000000..8266815
 +		return -1;
 +	}
 +
-+	DBG_ERR("set_base_user_quote: uid (%u), quota (%lu)\n", current_user, base_quota);
-+
 +	if ( smb_zfs_get_quota(handle->conn->connectpath, 
 +				current_user,
 +				SMB_USER_QUOTA_TYPE,
@@ -1266,6 +1279,8 @@ index 0000000..8266815
 +			current_user, handle->conn->connectpath );
 +		return -1;
 +	}
++
++	DBG_INFO("set_base_user_quote: uid (%u), quota (%lu)\n", current_user, base_quota);
 +
 +	if ( !existing_quota ) {
 +		ret = smb_zfs_set_quota(handle->conn->connectpath,
@@ -1300,6 +1315,7 @@ index 0000000..8266815
 +		return -1;
 +	}	
 +
++#if HAVE_LIBZFS
 +	/* Parameters for homedirs and quotas */
 +	config->zfs_auto_homedir = lp_parm_bool(SNUM(handle->conn), 
 +			"ixnas", "zfs_auto_homedir", false);
@@ -1320,8 +1336,9 @@ index 0000000..8266815
 +	}
 +
 +	if (config->zfs_auto_homedir) {
-+		create_zfs_autohomedir(handle, config->homedir_quota);
++		create_zfs_autohomedir(handle, config->homedir_quota, user);
 +	}
++#endif
 +
 +	/* OS-X Compatibility */
 +	config->posix_rename = lp_parm_bool(SNUM(handle->conn),
@@ -1784,7 +1801,7 @@ index 0000000..8387a64
 +}
 diff --git a/source3/modules/vfs_zfs_space.c b/source3/modules/vfs_zfs_space.c
 new file mode 100644
-index 0000000..16d5b07
+index 0000000..28f4b36
 --- /dev/null
 +++ b/source3/modules/vfs_zfs_space.c
 @@ -0,0 +1,68 @@
@@ -1839,9 +1856,9 @@ index 0000000..16d5b07
 +	if (res == (uint64_t)-1)
 +		return (res);
 +
-+	DEBUG(0, ("*bsize = %" PRIu64 "\n", *bsize));
-+	DEBUG(0, ("*dfree = %" PRIu64 "\n", *dfree));
-+	DEBUG(0, ("*dsize = %" PRIu64 "\n", *dsize));
++	DEBUG(9, ("*bsize = %" PRIu64 "\n", *bsize));
++	DEBUG(9, ("*dfree = %" PRIu64 "\n", *dfree));
++	DEBUG(9, ("*dsize = %" PRIu64 "\n", *dsize));
 +
 +	return (res);
 +}
