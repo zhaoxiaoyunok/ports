@@ -426,7 +426,6 @@ SAMBA4_BUNDLED_LIBS+=		!pyldb,!pyldb-util
 .endif
 # External Python modules
 
-BUILD_DEPENDS+=			${PYTHON_PKGNAMEPREFIX}iso8601>=0.1.11:devel/py-iso8601
 .endif
 # !SAMBA4_SUBPORT
 .endif
