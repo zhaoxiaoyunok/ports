@@ -142,7 +142,7 @@ lib/samba4/libdcerpc-samr.so.0
 lib/samba4/libdcerpc-samr.so.0.0.1
 %%AD_DC%%lib/samba4/libdcerpc-server.so
 %%AD_DC%%lib/samba4/libdcerpc-server.so.0
-lib/samba4/libdcerpc-server.so.0.0.1
+%%AD_DC%%lib/samba4/libdcerpc-server.so.0.0.1
 lib/samba4/libdcerpc.so
 lib/samba4/libdcerpc.so.0
 lib/samba4/libdcerpc.so.0.0.1
@@ -230,7 +230,7 @@ lib/samba4/private/libcom_err-samba4.so.0
 lib/samba4/private/libcom_err-samba4.so.0.25
 lib/samba4/private/libcommon-auth-samba4.so
 %%AD_DC%%lib/samba4/private/libdb-glue-samba4.so
-lib/samba4/private/libdsdb-garbage-collect-tombstones-samba4.so
+%%AD_DC%%lib/samba4/private/libdsdb-garbage-collect-tombstones-samba4.so
 lib/samba4/private/libdbwrap-samba4.so
 lib/samba4/private/libdcerpc-samba-samba4.so
 lib/samba4/private/libdcerpc-samba4.so
@@ -296,7 +296,7 @@ lib/samba4/private/libsamba-security-samba4.so
 lib/samba4/private/libsamba-sockets-samba4.so
 lib/samba4/private/libsamba3-util-samba4.so
 lib/samba4/private/libsamdb-common-samba4.so
-lib/samba4/private/libscavenge-dns-records-samba4.so
+%%AD_DC%%lib/samba4/private/libscavenge-dns-records-samba4.so
 lib/samba4/private/libsecrets3-samba4.so
 lib/samba4/private/libserver-id-db-samba4.so
 lib/samba4/private/libserver-role-samba4.so
@@ -518,8 +518,8 @@ lib/shared-modules/vfs/zfsacl.so
 %%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/dnsserver.py
 %%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/domain_update.py
 %%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/drs_utils.py
-%%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/dsdb.so
-%%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/dsdb_dns.so
+%%AD_DC%%%%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/dsdb.so
+%%AD_DC%%%%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/dsdb_dns.so
 %%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/emulate/__init__.py
 %%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/emulate/traffic_packets.py
 %%SAMBA4_PYTHON2%%%%PYTHON_SITELIBDIR%%/samba/emulate/traffic.py
