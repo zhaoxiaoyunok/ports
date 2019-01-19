@@ -776,7 +776,7 @@ index 0000000..6e53cbf
 +	/* read the number of file aces */
 +	if((naces = acl(smb_fname->base_name, ACE_GETACLCNT, 0, NULL)) == -1) {
 +		if(errno == ENOSYS) {
-+			DBG_ERR("acl(ACE_GETACLCNT, %s): Operation is not "
++			DBG_INFO("acl(ACE_GETACLCNT, %s): Operation is not "
 +				  "supported on the filesystem where the file "
 +				  "reside\n", smb_fname->base_name);
 +		} else {
