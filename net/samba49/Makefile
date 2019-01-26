@@ -17,14 +17,6 @@ IGNORE_NONTHREAD_PYTHON=	needs port lang/python${PYTHON_SUFFIX} to be build with
 
 CONFLICTS_INSTALL?=		samba4-4.0.* samba4[1-79]-4.* p5-Parse-Pidl-4.*
 
-EXTRA_PATCHES+=			${PATCHDIR}/0001-zfs-provisioning-patches.patch:-p1
-EXTRA_PATCHES+=			${PATCHDIR}/0001-Freenas-master-mdns-fixes-22.patch:-p1
-EXTRA_PATCHES+=		 	${PATCHDIR}/0001-add-ix-custom-vfs-modules.patch:-p1
-EXTRA_PATCHES+=		 	${PATCHDIR}/0001-add-support-for-xattrs-larger-than-64k.patch:-p1
-EXTRA_PATCHES+=		 	${PATCHDIR}/0001-add-parameters-for-ha-configuration.patch:-p1
-EXTRA_PATCHES+=			${PATCHDIR}/0001-add-idmap_fruit-backend.patch:-p1
-EXTRA_PATCHES+=			${PATCHDIR}/0001-fix-listen-backlog.patch:-p1
-
 SAMBA4_BASENAME=		samba
 SAMBA4_PORTNAME=		${SAMBA4_BASENAME}4
 SAMBA4_VERSION=			4.9.4
@@ -89,7 +81,7 @@ SUB_LIST+=			PKGCONFIGDIR=${PKGCONFIGDIR_REL}
 # Options
 OPTIONS_SUB=			yes
 
-OPTIONS_DEFINE=			AD_DC ADS DEBUG DOCS FAM LDAP LIBZFS\
+OPTIONS_DEFINE=			AD_DC ADS DEBUG DOCS FAM LDAP \
 				QUOTAS SYSLOG UTMP
 # Make those default options
 OPTIONS_DEFAULT:=		${OPTIONS_DEFINE}
@@ -103,7 +95,7 @@ OPTIONS_DEFINE+=		CUPS GPGME NTVFS SPOTLIGHT
 
 OPTIONS_RADIO=			DNS ZEROCONF
 OPTIONS_RADIO_DNS=		NSUPDATE BIND911
-OPTIONS_RADIO_ZEROCONF=		MDNSRESPONDER AVAHI
+OPTIONS_RADIO_ZEROCONF=		AVAHI
 ##############################################################################
 AD_DC_DESC=			Active Directory Domain Controller
 ADS_DESC=			Active Directory client(implies LDAP)
@@ -114,7 +106,6 @@ FAM_DESC=			File Alteration Monitor
 GPGME_DESC=			GpgME
 GLUSTERFS_DESC=			GlusterFS
 LDAP_DESC=			LDAP client
-LIBZFS_DESC=			LibZFS
 SPOTLIGHT_DESC=			Spotlight
 MANDOC_DESC=			Build manpages from DOCBOOK templates
 NTVFS_DESC=			Build *DEPRECATED* NTVFS file server
@@ -257,6 +248,7 @@ CONFIGURE_ARGS+=		\
 				--disable-rpath \
 				--without-lttng \
 				--without-gettext \
+				--disable-python \
 				--enable-pthreadpool \
 				--without-fake-kaserver \
 				--without-systemd \
@@ -274,8 +266,6 @@ NSUPDATE_RUN_DEPENDS=		samba-nsupdate:dns/samba-nsupdate
 AVAHI_CONFIGURE_ENABLE=		avahi
 AVAHI_LIB_DEPENDS=		libavahi-client.so:net/avahi-app
 
-MDNSRESPONDER_CONFIGURE_ENABLE=	dnssd
-MDNSRESPONDER_LIB_DEPENDS=	libdns_sd.so:net/mDNSResponder
 ##############################################################################
 DEBUG_CONFIGURE_ON=		--verbose --enable-debug
 DEBUG_MAKE_ARGS=		--verbose
@@ -336,10 +326,6 @@ LDAP_CONFIGURE_ON=		--with-ldap
 LDAP_USE=			OPENLDAP=yes
 LDAP_VARS=			SAMBA4_MODULES+=idmap_ldap
 
-LIBZFS_CONFIGURE_WITH=		libzfs
-LIBZFS_CONFIGURE_OFF=		--without-libzfs
-LIBZFS_VARS=			SAMBA4_MODULES+=vfs_zfs_space vfs_ixnas
-
 MANDOC_BUILD_DEPENDS=		${LOCALBASE}/share/xsl/docbook/manpages/docbook.xsl:textproc/docbook-xsl \
 				xsltproc:textproc/libxslt
 MANDOC_CONFIGURE_ENV_OFF=	XSLTPROC="true"
@@ -373,16 +359,6 @@ SAMBA4_MODULES+=		idmap_ad idmap_rfc2307 nss-info_template nss-info_rfc2307 nss-
 SAMBA4_MODULES+=		auth_skel pdb_test gpext_security gpext_registry gpext_scripts perfcount_test \
 				vfs_fake_dfq vfs_skel_opaque vfs_skel_transparent vfs_shadow_copy_test vfs_fake_acls \
 				vfs_nfs4acl_xattr vfs_error_inject
-.endif
-
-.if ${PORT_OPTIONS:MLIBZFS}
-CONFIGURE_ARGS+=        --with-libzfs
-WANT_EXP_MODULES+=      vfs_zfs_space vfs_ixnas
-SAMBA4_MODULES+=        vfs_zfs_space vfs_ixnas
-PLIST_SUB+=             LIBZFS=""
-.else
-CONFIGURE_ARGS+=        --without-libzfs
-PLIST_SUB+=             LIBZFS="@comment "
 .endif
 
 .if defined(WANT_EXP_MODULES) && !empty(WANT_EXP_MODULES)
@@ -425,10 +401,6 @@ SAMBA4_BUNDLED_LIBS+=		!pytdb
 SAMBA4_BUNDLED_LIBS+=		!pyldb,!pyldb-util
 .endif
 # External Python modules
-BUILD_DEPENDS+=			${PYTHON_PKGNAMEPREFIX}dnspython>=1.15.0:dns/py-dnspython@${PY_FLAVOR}
-RUN_DEPENDS+=			${PYTHON_PKGNAMEPREFIX}dnspython>=1.15.0:dns/py-dnspython@${PY_FLAVOR}
-
-BUILD_DEPENDS+=			${PYTHON_PKGNAMEPREFIX}iso8601>=0.1.11:devel/py-iso8601@${PY_FLAVOR}
 .endif
 # !SAMBA4_SUBPORT
 .endif
