@@ -551,6 +551,7 @@ pre-build-MANDOC-off:
 
 pre-install:
 				@${REINPLACE_CMD} -e 's|%%SAMBA4_PYTHON3_CMD%%|${SAMBA4_PYTHON3_CMD}|g' ${WRKDIR}/samba_server 
+				@${REINPLACE_CMD} -e 's|%%PYTHON_SITELIBDIR%%|${PYTHON_SITELIBDIR}|g' ${WRKDIR}/samba_server
 
 post-install-rm-junk:
 .for f in vfs_aio_linux.8 vfs_btrfs.8 vfs_ceph.8 vfs_gpfs.8
