@@ -52,6 +52,7 @@ SAMBA4_INCLUDEDIR=		${PREFIX}/include/${SAMBA4_PORTNAME}
 SAMBA4_CONFDIR=			${PREFIX}/etc
 SAMBA4_CONFIG=			smb4.conf
 SAMBA4_PYTHON3_CMD=		${LOCALBASE}/bin/python${PYTHON3_DEFAULT}
+SAMBA4_PYTHON3_SITELIBDIR=	${LOCALBASE}/lib/python${PYTHON3_DEFAULT}/site-packages
 
 CONFIGURE_ARGS+=		--mandir="${MANPREFIX}/man" \
 				--sysconfdir="${SAMBA4_CONFDIR}" \
@@ -551,7 +552,7 @@ pre-build-MANDOC-off:
 
 pre-install:
 				@${REINPLACE_CMD} -e 's|%%SAMBA4_PYTHON3_CMD%%|${SAMBA4_PYTHON3_CMD}|g' ${WRKDIR}/samba_server 
-				@${REINPLACE_CMD} -e 's|%%PYTHON_SITELIBDIR%%|${PYTHON_SITELIBDIR}|g' ${WRKDIR}/samba_server
+				@${REINPLACE_CMD} -e 's|%%SAMBA4_PYTHON3_SITELIBDIR%%|${PYTHON3_SITELIBDIR}|g' ${WRKDIR}/samba_server
 
 post-install-rm-junk:
 .for f in vfs_aio_linux.8 vfs_btrfs.8 vfs_ceph.8 vfs_gpfs.8

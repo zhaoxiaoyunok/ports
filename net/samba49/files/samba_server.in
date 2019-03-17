@@ -43,7 +43,7 @@ configtest_cmd="samba_server_checkconfig"
 reload_cmd="samba_server_reload_cmd"
 rcvar_cmd="samba_server_rcvar_cmd"
 
-wsdd_cmd="%%PYTHON_SITELIBDIR%%/wsdd/wsdd.py"
+wsdd_cmd="%%SAMBA4_PYTHON3_SITELIBDIR%%/wsdd/wsdd.py"
 python3_cmd="%%SAMBA4_PYTHON3_CMD%%"
 
 samba_server_checkconfig() {
